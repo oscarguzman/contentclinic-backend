@@ -9,13 +9,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// ✅ Apply CORS middleware BEFORE anything else
 app.use(cors({
   origin: "https://content-clinic.onrender.com",
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+// ✅ Preflight support
 app.options("*", cors());
+
 app.use(bodyParser.json());
 
 app.post("/generate", async (req, res) => {
@@ -37,9 +40,8 @@ app.post("/generate", async (req, res) => {
     });
 
     const data = await gptRes.json();
-    const result = data.choices[0].message.content;
+    const result = data.choices?.[0]?.message?.content || "No content returned.";
 
-    res.setHeader("Access-Control-Allow-Origin", "https://content-clinic.onrender.com");
     res.json({ result });
   } catch (error) {
     console.error("⚠️ Error:", error);
@@ -47,7 +49,6 @@ app.post("/generate", async (req, res) => {
   }
 });
 
-// ✅ Don't forget to start the server
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
