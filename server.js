@@ -9,10 +9,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// ✅ CORS setup — make sure this is exactly here
+// ✅ CORS: allow frontend origin explicitly
 app.use(cors({
-  origin: "https://content-clinic.onrender.com"
+  origin: "https://content-clinic.onrender.com",
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
+// ✅ Handle preflight requests
+app.options("*", cors());
 
 app.use(bodyParser.json());
 
@@ -37,6 +42,7 @@ app.post("/generate", async (req, res) => {
     const data = await gptRes.json();
     const result = data.choices[0].message.content;
 
+    res.setHeader("Access-Control-Allow-Origin", "https://content-clinic.onrender.com");
     res.json({ result });
   } catch (error) {
     console.error("⚠️ Error:", error);
@@ -47,3 +53,4 @@ app.post("/generate", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
+
