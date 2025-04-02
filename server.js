@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-const OPENAI_KEY = "sk-proj-..." // your real key here
+const OPENAI_KEY = "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" // your real key here
 
 app.post("/generate", async (req, res) => {
   const { topic, tone, platform } = req.body;
