@@ -1,24 +1,22 @@
-// server.js
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import bodyParser from "body-parser";
 import fetch from "node-fetch";
 
-dotenv.config();
-
 const app = express();
-const port = process.env.PORT || 3000;
-const OPENAI_KEY = process.env.OPENAI_API_KEY;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
+
+const OPENAI_KEY = "sk-proj-..." // your real key here
 
 app.post("/generate", async (req, res) => {
+  const { topic, tone, platform } = req.body;
+
+  const prompt = `Write a ${tone} social media post about "${topic}" for the ${platform} platform. Keep it short and engaging.`;
+
   try {
-    const { topic, tone, platform } = req.body;
-
-    const prompt = `Write a ${tone} social media post about \"${topic}\" for the ${platform} platform. Keep it short and engaging.`;
-
     const gptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -32,15 +30,15 @@ app.post("/generate", async (req, res) => {
     });
 
     const json = await gptResponse.json();
-    const result = json.choices?.[0]?.message?.content;
+    const result = json.choices?.[0]?.message?.content || "No content generated.";
 
     res.json({ result });
-  } catch (error) {
-    console.error("Error generating content:", error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Something went wrong." });
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
