@@ -1,27 +1,26 @@
-const express = require("express");
-const fetch = require("node-fetch");
-const bodyParser = require("body-parser");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
-app.use(bodyParser.json());
+const port = process.env.PORT || 3000;
 
-const OPENAI_KEY = "sk-proj-..."; // Replace with your OpenAI API key
+app.use(cors());
+app.use(express.json());
 
 app.post("/generate", async (req, res) => {
-  const { topic, tone, platform } = req.body;
-
-  if (!topic || !tone || !platform) {
-    return res.status(400).json({ error: "Missing fields" });
-  }
-
-  const prompt = `Write a ${tone} social media post about "${topic}" for the ${platform} platform. Keep it short and engaging.`;
-
   try {
-    const gptRes = await fetch("https://api.openai.com/v1/chat/completions", {
+    const { topic, tone, platform } = req.body;
+
+    const prompt = `Write a ${tone} social media post about "${topic}" for the ${platform} platform. Keep it short and engaging.`;
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
@@ -29,19 +28,20 @@ app.post("/generate", async (req, res) => {
       }),
     });
 
-    const json = await gptRes.json();
-    const result = json.choices?.[0]?.message?.content || "No content generated";
+    const data = await response.json();
+    const result = data.choices?.[0]?.message?.content;
 
     res.json({ result });
-  } catch (err) {
-    console.error("GPT Error:", err);
-    res.status(500).json({ error: "Failed to generate content" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong." });
   }
 });
 
-app.use(express.static("public"));
+app.get("/", (req, res) => {
+  res.send("Health Hook backend is up!");
+});
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
