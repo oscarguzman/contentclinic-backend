@@ -9,9 +9,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// ✅ CORS setup — make sure this is exactly here
 app.use(cors({
-  origin: "https://content-clinic.onrender.com" // ✅ your frontend URL
+  origin: "https://content-clinic.onrender.com"
 }));
+
 app.use(bodyParser.json());
 
 app.post("/generate", async (req, res) => {
@@ -37,11 +39,11 @@ app.post("/generate", async (req, res) => {
 
     res.json({ result });
   } catch (error) {
-    console.error(error);
+    console.error("⚠️ Error:", error);
     res.status(500).json({ error: "Something went wrong." });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
